@@ -1,5 +1,4 @@
 using EPiServer.DataAbstraction;
-using EPiServer.PlugIn;
 using EPiServer.Scheduler;
 
 namespace MyAppNamespace;

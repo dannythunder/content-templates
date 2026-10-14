@@ -1,11 +1,32 @@
-namespace Cms.Empty._1;
+using EPiServer.Cms.UI.AspNetIdentity;
+using EPiServer.DependencyInjection;
+using EPiServer.Scheduler;
+using EPiServer.Web.Routing;
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.ConfigureCmsDefaults();
+
+if (builder.Environment.IsDevelopment())
 {
-    public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
+    AppDomain.CurrentDomain.SetData("DataDirectory", Path.Combine(builder.Environment.ContentRootPath, "App_Data"));
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureCmsDefaults()
-            .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+    builder.Services.Configure<SchedulerOptions>(options => options.Enabled = false);
 }
+
+builder.Services
+    .AddCmsAspNetIdentity<ApplicationUser>()
+    .AddCms()
+    .AddAdminUserRegistration()
+    .AddEmbeddedLocalization<Program>();
+
+var app = builder.Build();
+
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapContent();
+
+app.Run();

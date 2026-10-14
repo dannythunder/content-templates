@@ -1,11 +1,43 @@
-namespace Commerce.Empty._1;
+using EPiServer.Cms.Shell;
+using EPiServer.Cms.UI.AspNetIdentity;
+using EPiServer.Scheduler;
+using EPiServer.ServiceLocation;
+using EPiServer.Web.Routing;
+using Mediachase.Commerce.Anonymous;
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.ConfigureCmsDefaults();
+
+var isDevelopment = builder.Environment.IsDevelopment();
+
+if (isDevelopment)
 {
-    public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
+    AppDomain.CurrentDomain.SetData("DataDirectory", Path.Combine(builder.Environment.ContentRootPath, "App_Data"));
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureCmsDefaults()
-            .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+    builder.Services.Configure<SchedulerOptions>(options => options.Enabled = false);
 }
+
+builder.Services
+    .AddCmsAspNetIdentity<ApplicationUser>()
+    .AddCommerce()
+    .AddAdminUserRegistration()
+    .AddEmbeddedLocalization<Program>();
+
+var app = builder.Build();
+
+if (isDevelopment)
+{
+    app.UseDeveloperExceptionPage();
+}
+
+app.UseAnonymousId();
+
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapContent();
+
+app.Run();

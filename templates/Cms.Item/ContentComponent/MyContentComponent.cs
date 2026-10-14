@@ -1,5 +1,3 @@
-using System;
-using EPiServer.Core;
 using EPiServer.Web.Mvc;
 using Microsoft.AspNetCore.Mvc;
 
